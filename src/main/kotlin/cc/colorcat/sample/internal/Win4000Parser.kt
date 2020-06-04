@@ -1,11 +1,6 @@
 package cc.colorcat.sample.internal
 
-import cc.colorcat.kspider.Parser
-import cc.colorcat.kspider.Scrap
-import cc.colorcat.kspider.Seed
-import cc.colorcat.kspider.WebSnapshot
-import cc.colorcat.kspider.DepthPattern
-import cc.colorcat.kspider.linkedListOf
+import cc.colorcat.kspider.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -25,7 +20,6 @@ class Win4000Parser : Parser {
 
     override fun parse(seed: Seed, snapshot: WebSnapshot): List<Scrap> {
         if (HOST != seed.uri.host.toLowerCase()) return emptyList()
-        val result = linkedListOf<Scrap>()
 
         val doc = Jsoup.parse(snapshot.contentToString(), seed.baseUrl())
         val imageAndNext = doc.selectFirst("div.pic-meinv a[href~=^(http)(s)?://(.)*\\.(htm|html)$]")
@@ -39,13 +33,11 @@ class Win4000Parser : Parser {
         val nextUrl = imageAndNext.attr("href")
         val pattern = if (nextUrl.matches(nextGroupStartPage)) DepthPattern.RAISE else DepthPattern.PARALLEL
         val nextScrap = seed.newScrapWithJoin(nextUrl, pattern)
-                .fill("dir", title)
-                .fillIfAbsent("Host", HOST)
-                .fill("Referer", seed.uri.toString())
+            .fill("dir", title)
+            .fillIfAbsent("Host", HOST)
+            .fill("Referer", seed.uri.toString())
 
-        result.add(imageScrap)
-        result.add(nextScrap)
-        return result
+        return listOf(imageScrap, nextScrap)
     }
 
     private fun parseTitle(imageAndNext: Element, doc: Document): String {

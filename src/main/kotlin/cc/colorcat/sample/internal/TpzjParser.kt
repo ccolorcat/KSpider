@@ -27,11 +27,11 @@ class TpzjParser : Parser {
 
         val nextPagePath = imageAndNext.selectFirst("a[href~=$HTML_PATH_REGEX][target=_self]").attr("href")
         val pattern = if (nextPagePath.startsWith("/")) DepthPattern.RAISE else DepthPattern.PARALLEL
-        val nextPageSeed = seed.newScrapWithJoin(nextPagePath, pattern)
+        val nextPageScrap = seed.newScrapWithJoin(nextPagePath, pattern)
             .fillIfAbsent("Host", HOST)
             .fill("Referer", seed.uri.toString())
-        if (pattern == DepthPattern.RAISE) nextPageSeed.remove("dir") else nextPageSeed.fillIfAbsent("dir", title)
-        return listOf(imageScrap, nextPageSeed)
+        if (pattern == DepthPattern.RAISE) nextPageScrap.remove("dir") else nextPageScrap.fillIfAbsent("dir", title)
+        return listOf(imageScrap, nextPageScrap)
     }
 
     private fun parseTitle(imageAndNext: Element, doc: Document): String {
