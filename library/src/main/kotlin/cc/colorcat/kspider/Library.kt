@@ -3,6 +3,7 @@ package cc.colorcat.kspider
 import java.io.Closeable
 import java.io.IOException
 import java.net.URI
+import java.security.MessageDigest
 import java.util.*
 
 /**
@@ -65,4 +66,19 @@ fun close(closeable: Closeable?) {
         } catch (ignore: IOException) {
         }
     }
+}
+
+private val HEX_CHARS = "0123456789abcdef".toCharArray()
+
+fun md5(input: String): String {
+    return MessageDigest.getInstance("MD5").digest(input.toByteArray()).let { hexBinary(it) }
+}
+
+private fun hexBinary(data: ByteArray): String {
+    val builder = StringBuilder(data.size shl 1)
+    data.forEach {
+        val i = it.toInt()
+        builder.append(HEX_CHARS[i shr 4 and 0xF]).append(HEX_CHARS[i and 0xF])
+    }
+    return builder.toString()
 }

@@ -13,9 +13,8 @@ class KSpider private constructor(builder: Builder) : Call.Factory {
     internal val parser: Parser = ParserProxy(parsers)
     val handlers: Map<String, List<Handler>> = builder.handlers
     val interceptors: List<Interceptor> = builder.interceptors
-    internal val _connection: Connection = builder.connection
-    val connection: Connection
-        get() = _connection.clone()
+    internal val connections: Map<String, Connection> = builder.connections
+    internal val defaultConnection: Connection = builder.defaultConnection
     val executor: ExecutorService = builder.executor
     val depthFirst: Boolean = builder.depthFirst
     val maxRetry: Int = builder.maxRetry
@@ -23,6 +22,7 @@ class KSpider private constructor(builder: Builder) : Call.Factory {
     val maxDepth: Int = builder.maxDepth
     val eventListener: EventListener = builder.eventListener
     val seedJar: SeedJar = builder.seedJar
+    val webJar: WebJar = builder.webJar
     internal val dispatcher: Dispatcher = Dispatcher(this)
 
     fun start(tag: String, uri: String) {
@@ -58,6 +58,10 @@ class KSpider private constructor(builder: Builder) : Call.Factory {
         dispatcher.enqueue(calls, depthFirst)
     }
 
+    internal fun newConnection(host: String): Connection {
+        return connections.getOrDefault(host, defaultConnection).clone()
+    }
+
     override fun newCall(seed: Seed): Call = RealCall(seed, this)
 
     fun newBuilder(): Builder = Builder(this)
@@ -67,13 +71,16 @@ class KSpider private constructor(builder: Builder) : Call.Factory {
         private val _parsers: MutableMap<String, MutableList<Parser>>
         private val _handlers: MutableMap<String, MutableList<Handler>>
         private val _interceptors: MutableList<Interceptor>
+        private val _connections: MutableMap<String, Connection>
         val parsers: Map<String, List<Parser>>
             get() = _parsers.toImmutableMap()
         val handlers: Map<String, List<Handler>>
             get() = _handlers.toImmutableMap()
         val interceptors: List<Interceptor>
             get() = _interceptors.toImmutableList()
-        var connection: Connection
+        val connections: Map<String, Connection>
+            get() = _connections.toMap()
+        var defaultConnection: Connection
             private set
         var executor: ExecutorService
             private set
@@ -89,12 +96,15 @@ class KSpider private constructor(builder: Builder) : Call.Factory {
             private set
         var seedJar: SeedJar
             private set
+        var webJar: WebJar
+            private set
 
         constructor() {
             _parsers = mutableMapOf()
             _handlers = mutableMapOf()
             _interceptors = mutableListOf()
-            connection = HttpConnection()
+            _connections = mutableMapOf()
+            defaultConnection = HttpConnection()
             executor = defaultService()
             depthFirst = false
             maxRetry = 3
@@ -102,13 +112,15 @@ class KSpider private constructor(builder: Builder) : Call.Factory {
             maxDepth = 100
             eventListener = emptyEventListener
             seedJar = emptySeedJar
+            webJar = emptyWebJar
         }
 
         internal constructor(spider: KSpider) {
             _parsers = spider.parsers.toMutableMap()
             _handlers = spider.handlers.toMutableMap()
             _interceptors = spider.interceptors.toMutableList()
-            connection = spider._connection
+            _connections = spider.connections.toMutableMap()
+            defaultConnection = spider.defaultConnection
             executor = spider.executor
             depthFirst = spider.depthFirst
             maxRetry = spider.maxRetry
@@ -116,6 +128,7 @@ class KSpider private constructor(builder: Builder) : Call.Factory {
             maxDepth = spider.maxDepth
             eventListener = spider.eventListener
             seedJar = spider.seedJar
+            webJar = spider.webJar
         }
 
         fun registerParser(tag: String, parser: Parser): Builder {
@@ -124,7 +137,7 @@ class KSpider private constructor(builder: Builder) : Call.Factory {
         }
 
         fun unregisterParser(tag: String, parser: Parser): Builder {
-            this._parsers[tag]?.remove(parser)
+            _parsers[tag]?.remove(parser)
             return this
         }
 
@@ -134,7 +147,27 @@ class KSpider private constructor(builder: Builder) : Call.Factory {
         }
 
         fun unregisterHandler(tag: String, handler: Handler): Builder {
-            this._handlers[tag]?.remove(handler)
+            _handlers[tag]?.remove(handler)
+            return this
+        }
+
+        fun registerConnection(host: String, connection: Connection): Builder {
+            _connections[host] = connection
+            return this
+        }
+
+        fun registerConnection(hosts: Array<String>, connection: Connection): Builder {
+            hosts.forEach { _connections[it] = connection }
+            return this
+        }
+
+        fun unregisterConnection(host: String): Builder {
+            _connections.remove(host)
+            return this
+        }
+
+        fun defaultConnection(connection: Connection): Builder {
+            defaultConnection = connection
             return this
         }
 
@@ -145,11 +178,6 @@ class KSpider private constructor(builder: Builder) : Call.Factory {
 
         fun removeInterceptor(interceptor: Interceptor): Builder {
             this._interceptors.remove(interceptor)
-            return this
-        }
-
-        fun connection(connection: Connection): Builder {
-            this.connection = connection
             return this
         }
 
@@ -188,6 +216,11 @@ class KSpider private constructor(builder: Builder) : Call.Factory {
 
         fun seedJar(seedJar: SeedJar): Builder {
             this.seedJar = seedJar
+            return this
+        }
+
+        fun webJar(webJar: WebJar): Builder {
+            this.webJar = webJar
             return this
         }
 

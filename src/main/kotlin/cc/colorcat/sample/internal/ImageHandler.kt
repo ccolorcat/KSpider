@@ -17,16 +17,16 @@ class ImageHandler(private val saveDir: String) : Handler {
         val url = scrap.data["url"]
         if (!isImageUrl(url)) return false
 
-        val name = scrap.data["name"]
+        val siteName = scrap.data["site_name"]
         val dir = scrap.data["dir"] ?: "other"
         val fileName = parseFileName(url)
-        val subPath = if (name == null) arrayOf(dir, fileName) else arrayOf(name, dir, fileName)
+        val subPath = if (siteName == null) arrayOf(dir, fileName) else arrayOf(siteName, dir, fileName)
 
         val savePath = Paths.get(saveDir, *subPath).toFile()
-        if (savePath.exists()) {
-            Log.w(TAG, "$savePath exists, url=$url")
-            return true
-        }
+//        if (savePath.exists()) {
+//            Log.w(TAG, "$savePath exists, url=$url")
+//            return true
+//        }
         val host = scrap.data["Host"] ?: URI.create(url!!).host
         val referer = scrap.data["Referer"] ?: scrap.uri.toString()
         val headers = Headers.ofWithIgnoreNull(

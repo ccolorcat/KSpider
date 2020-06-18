@@ -60,7 +60,8 @@ internal class Dispatcher(private val spider: KSpider) {
             }
         }
         spider.seedJar.save(success, failed, reachedMaxDepth)
-        spider._connection.onAllFinish()
+        spider.defaultConnection.onAllFinish()
+        spider.connections.forEach { (_, conn) -> conn.onAllFinish() }
     }
 
     @Synchronized

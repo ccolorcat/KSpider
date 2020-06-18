@@ -15,15 +15,21 @@ import java.util.*
 private const val TAG = "Event"
 private const val DRIVER_PATH = "/Users/cxx/Workspace/library/chromedriver"
 
-private val saveDir = Paths.get(System.getProperty("user.home"), "spider").toString()
+//private val saveDir = Paths.get(System.getProperty("user.home"), "spider").toString()
+private val saveDir = "/Volumes/Untitled/spider"
 private val spider = KSpider.Builder()
-    .connection(WebDriverConnection(DRIVER_PATH))
+    .defaultConnection(WebDriverConnection(DRIVER_PATH))
+    .registerConnection(arrayOf(BILI_SPACE_HOST, BILI_SPACE_DETAIL_HOST), BiliWebDriverConnection(DRIVER_PATH))
     .seedJar(FileSeedJar(File(saveDir, "seed.txt")))
+    .webJar(DiskWebJar(Paths.get(saveDir, "cache").toFile()))
     .registerParser("bing", BingParser())
     .registerHandler("bing", BingHandler(saveDir))
     .registerParser("image", Win4000Parser())
     .registerParser("image", HDWallpaperParser())
     .registerParser("image", TpzjParser())
+    .registerParser("image", BiliDynamicParser2())
+//    .registerParser("image", BiliDynamicParser())
+//    .registerParser("image", BiliDynamicDetailParser())
     .registerHandler("image", ImageHandler(saveDir))
     .eventListener(object : EventListener {
         override fun onSuccess(seed: Seed) {
@@ -45,14 +51,35 @@ private val spider = KSpider.Builder()
     .depthFirst(true)
     .build()
 
+private val ssqs = "https://space.bilibili.com/424263116/dynamic" to "十千三岁" // sexy
+private val qgqsdle = "https://space.bilibili.com/305276429/dynamic" to "且攻且受的念儿"
+private val lzx = "https://space.bilibili.com/499720112/dynamic" to "绫斩仙"
+private val ezyppj = "https://space.bilibili.com/24715356/dynamic" to "二次元の泡泡酱"
+private val yyyy = "https://space.bilibili.com/4739847/dynamic" to "ラプラス"
+private val csj = "https://space.bilibili.com/21686859/dynamic" to "纯水酱" // the size of image too big
+private val idshwm = "https://space.bilibili.com/39457507/dynamic" to "ID是坏文明"
 
 fun main() {
+    bySelect()
+}
+
+private fun bySelect() {
+    val selected = idshwm
+    val url = selected.first
+    val seeds = if (url.startsWith("http")) {
+        listOf(Seed.newSeed("image", url, 0, mapOf("site_name" to "BiliBili", "dir" to selected.second)))
+    } else {
+        emptyList()
+    }
+    spider.startWithSeedJar(seeds)
+}
+
+private fun byInput() {
     print("Input Url: ")
     val scanner = Scanner(System.`in`)
     val url = scanner.nextLine()
-//    spider.start("image", url, mapOf("name" to "tupianzj"))
-    val seeds = if (isHtmOrHtmlUrl(url)) {
-        listOf(Seed.newSeed("image", url, 0, mapOf("name" to "tupianzj")))
+    val seeds = if (url.toLowerCase().startsWith("http")) {
+        listOf(Seed.newSeed("image", url, 0))
     } else {
         emptyList()
     }

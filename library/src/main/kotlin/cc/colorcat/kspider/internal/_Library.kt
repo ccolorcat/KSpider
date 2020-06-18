@@ -1,9 +1,6 @@
 package cc.colorcat.kspider.internal
 
-import cc.colorcat.kspider.EventListener
-import cc.colorcat.kspider.Scrap
-import cc.colorcat.kspider.Seed
-import cc.colorcat.kspider.SeedJar
+import cc.colorcat.kspider.*
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.nio.charset.Charset
@@ -43,12 +40,12 @@ internal fun <K, T> Map<K, List<T>>.toMutableMap(): MutableMap<K, MutableList<T>
 
 internal fun defaultService(): ExecutorService {
     val executor = ThreadPoolExecutor(
-            8,
-            10,
-            60L,
-            TimeUnit.SECONDS,
-            LinkedBlockingDeque(),
-            ThreadPoolExecutor.DiscardOldestPolicy()
+        8,
+        10,
+        60L,
+        TimeUnit.SECONDS,
+        LinkedBlockingDeque(),
+        ThreadPoolExecutor.DiscardOldestPolicy()
     )
     executor.allowCoreThreadTimeOut(true)
     return executor
@@ -78,12 +75,21 @@ internal val emptySeedJar: SeedJar by lazy {
     }
 }
 
+internal val emptyWebJar: WebJar by lazy {
+    object : WebJar {
+        override fun save(seed: Seed, snapshot: WebSnapshot) {
+        }
+
+        override fun load(seed: Seed): WebSnapshot? = null
+    }
+}
+
 internal fun parseCharset(contentType: String?): Charset? {
     return contentType
-            ?.split(";")
-            ?.map { it.trim().split("=") }
-            ?.filter { it.size == 2 && "charset".equals(it[0], true) }
-            ?.let { if (it.isEmpty()) null else Charset.forName(it[0][1]) }
+        ?.split(";")
+        ?.map { it.trim().split("=") }
+        ?.filter { it.size == 2 && "charset".equals(it[0], true) }
+        ?.let { if (it.isEmpty()) null else Charset.forName(it[0][1]) }
 }
 
 internal fun InputStream.readByteArray(): ByteArray {

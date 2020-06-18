@@ -10,9 +10,9 @@ import java.nio.charset.Charset
  */
 @Suppress("UNUSED")
 data class WebSnapshot(
-        val uri: URI,
-        private val content: ByteArray,
-        private val charset: Charset = Charsets.UTF_8
+    val uri: URI,
+    internal val content: ByteArray,
+    private val charset: Charset = Charsets.UTF_8
 ) {
     private val resources = mutableMapOf<Charset, String>()
 
