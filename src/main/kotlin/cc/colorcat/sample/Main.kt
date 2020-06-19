@@ -3,6 +3,8 @@ package cc.colorcat.sample
 import cc.colorcat.kspider.*
 import cc.colorcat.kspider.EventListener
 import cc.colorcat.sample.internal.*
+import org.openqa.selenium.By
+import org.openqa.selenium.WebDriver
 import java.io.File
 import java.nio.file.Paths
 import java.util.*
@@ -19,7 +21,10 @@ private const val DRIVER_PATH = "/Users/cxx/Workspace/library/chromedriver"
 private val saveDir = "/Volumes/Untitled/spider"
 private val spider = KSpider.Builder()
     .defaultConnection(WebDriverConnection(DRIVER_PATH))
-    .registerConnection(arrayOf(BILI_SPACE_HOST, BILI_SPACE_DETAIL_HOST), BiliWebDriverConnection(DRIVER_PATH))
+    .registerConnection(
+        arrayOf(BILI_SPACE_HOST, BILI_SPACE_DETAIL_HOST),
+        BiliWebDriverConnection(DRIVER_PATH, true, ::reachEndBili)
+    )
     .seedJar(FileSeedJar(File(saveDir, "seed.txt")))
     .webJar(DiskWebJar(Paths.get(saveDir, "cache").toFile()))
     .registerParser("bing", BingParser())
@@ -51,7 +56,14 @@ private val spider = KSpider.Builder()
     .depthFirst(true)
     .build()
 
-private val ssqs = "https://space.bilibili.com/424263116/dynamic" to "十千三岁" // sexy
+private val reachData = "(.)*05-[0-9]+".toRegex() // 爬 B 站动态时，截止的动态时间
+
+private fun reachEndBili(driver: WebDriver): Boolean {
+    return driver.findElements(By.cssSelector("a[class='detail-link tc-slate']"))
+        .findLast { it.text.contains(reachData) } != null
+}
+
+private val sqss = "https://space.bilibili.com/424263116/dynamic" to "十千三岁" // sexy
 private val qgqsdle = "https://space.bilibili.com/305276429/dynamic" to "且攻且受的念儿"
 private val lzx = "https://space.bilibili.com/499720112/dynamic" to "绫斩仙"
 private val ezyppj = "https://space.bilibili.com/24715356/dynamic" to "二次元の泡泡酱"

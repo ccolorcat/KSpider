@@ -14,11 +14,15 @@ import kotlin.random.Random
  * Date: 2020-06-16
  * GitHub: https://github.com/ccolorcat
  */
-class BiliWebDriverConnection(driverPath: String, needSetProperty: Boolean = true) :
-    WebDriverConnection(driverPath, needSetProperty) {
+class BiliWebDriverConnection(
+    driverPath: String,
+    needSetProperty: Boolean = true,
+    private val reachEnd: ((WebDriver) -> Boolean) = { _ -> false }
+) : WebDriverConnection(driverPath, needSetProperty) {
 
     private companion object {
         const val TAG = "BiliBili"
+        private val noMore = By.className("no-more")
     }
 
     override fun afterLoadUrl(driver: WebDriver, seed: Seed) {
@@ -30,7 +34,7 @@ class BiliWebDriverConnection(driverPath: String, needSetProperty: Boolean = tru
     }
 
     override fun clone(): Connection {
-        val connection = BiliWebDriverConnection(driverPath, false)
+        val connection = BiliWebDriverConnection(driverPath, false, reachEnd)
         connection._driver = driver
         return connection
     }
@@ -46,12 +50,18 @@ class BiliWebDriverConnection(driverPath: String, needSetProperty: Boolean = tru
         while (count < 3) {
             scrollByEndKey(driver)
             sleep(50L, 100L)
-            if (driver.findElements(By.className("no-more")).isNotEmpty()) {
+            if (reachEnd(driver)) {
                 Log.d(TAG, "find out no-more")
                 ++count
                 if (count >= 5) sleep(500L, 1000L)
             }
         }
+    }
+
+    private fun reachEnd(driver: WebDriver): Boolean {
+        if (reachEnd.invoke(driver)) return true
+        if (driver.findElements(noMore).isNotEmpty()) return true
+        return false
     }
 
     private fun scrollWithDetailPage(driver: WebDriver, seed: Seed) {
