@@ -6,7 +6,7 @@ package cc.colorcat.kspider
  * Github: https://github.com/ccolorcat
  */
 interface SeedJar {
-    fun save(success: List<Seed>, failed: List<Seed>, reachedMaxDepth: List<Seed>)
+    fun save(success: List<Seed>, failed: List<Seed>, reachedMaxDepth: List<Seed>) {}
 
-    fun load(): List<Seed>
+    fun load(): List<Seed> = emptyList()
 }

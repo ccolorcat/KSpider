@@ -69,7 +69,8 @@ private fun before(text: String, date: LocalDate = LocalDate.now()): Boolean {
 }
 
 private fun parseDate(text: String): LocalDate {
-    val date = text.split("-").map { it.toInt() }
+    val result = text.split("-")
+    val date = if (result.size > 1) result.map { it.toInt() } else emptyList()
     return when (date.size) {
         2 -> LocalDate.of(LocalDate.now().year, date[0], date[1])
         3 -> LocalDate.of(date[0], date[1], date[2])
@@ -86,11 +87,12 @@ private val csj = "https://space.bilibili.com/21686859/dynamic" to "纯水酱" /
 private val idshwm = "https://space.bilibili.com/39457507/dynamic" to "ID是坏文明"
 
 fun main() {
-    bySelect()
+    for(up in listOf(sqss, qgqsdle, lzx, ezyppj, yyyy, csj, idshwm)) {
+        bySelect(up)
+    }
 }
 
-private fun bySelect() {
-    val selected = idshwm
+private fun bySelect(selected: Pair<String, String>) {
     val url = selected.first
     val seeds = if (url.startsWith("http")) {
         listOf(Seed.newSeed("image", url, 0, mapOf("site_name" to "BiliBili", "dir" to selected.second)))

@@ -34,9 +34,7 @@ class BiliWebDriverConnection(
     }
 
     override fun clone(): Connection {
-        val connection = BiliWebDriverConnection(driverPath, false, reachEnd)
-        connection._driver = driver
-        return connection
+        return BiliWebDriverConnection(driverPath, false, reachEnd)
     }
 
     /**
@@ -51,7 +49,7 @@ class BiliWebDriverConnection(
             scrollByEndKey(driver)
             sleep(50L, 100L)
             if (reachEnd(driver)) {
-                Log.d(TAG, "find out no-more")
+                Log.d(TAG, "${seed.uri} reach end")
                 ++count
                 if (count >= 5) sleep(500L, 1000L)
             }

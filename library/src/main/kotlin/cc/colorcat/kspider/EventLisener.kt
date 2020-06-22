@@ -6,11 +6,11 @@ package cc.colorcat.kspider
  * Github: https://github.com/ccolorcat
  */
 interface EventListener {
-    fun onSuccess(seed: Seed)
+    fun onSuccess(seed: Seed) {}
 
-    fun onFailure(seed: Seed, reason: Throwable)
+    fun onFailure(seed: Seed, reason: Throwable) {}
 
-    fun onReachedMaxDepth(seed: Seed)
+    fun onReachedMaxDepth(seed: Seed) {}
 
-    fun onHandled(scrap: Scrap)
+    fun onHandled(scrap: Scrap) {}
 }
