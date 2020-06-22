@@ -7,6 +7,7 @@ import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
 import java.io.File
 import java.nio.file.Paths
+import java.time.LocalDate
 import java.util.*
 
 /**
@@ -56,11 +57,24 @@ private val spider = KSpider.Builder()
     .depthFirst(true)
     .build()
 
-private val reachData = "(.)*05-[0-9]+".toRegex() // 爬 B 站动态时，截止的动态时间
+private val reachData = LocalDate.of(2020, 6, 5) // 爬 B 站动态时，截止的动态时间
 
 private fun reachEndBili(driver: WebDriver): Boolean {
     return driver.findElements(By.cssSelector("a[class='detail-link tc-slate']"))
-        .findLast { it.text.contains(reachData) } != null
+        .findLast { before(it.text, reachData) } != null
+}
+
+private fun before(text: String, date: LocalDate = LocalDate.now()): Boolean {
+    return parseDate(text).isBefore(date)
+}
+
+private fun parseDate(text: String): LocalDate {
+    val date = text.split("-").map { it.toInt() }
+    return when (date.size) {
+        2 -> LocalDate.of(LocalDate.now().year, date[0], date[1])
+        3 -> LocalDate.of(date[0], date[1], date[2])
+        else -> LocalDate.now()
+    }
 }
 
 private val sqss = "https://space.bilibili.com/424263116/dynamic" to "十千三岁" // sexy
