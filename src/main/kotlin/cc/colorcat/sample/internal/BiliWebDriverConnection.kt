@@ -34,7 +34,9 @@ class BiliWebDriverConnection(
     }
 
     override fun clone(): Connection {
-        return BiliWebDriverConnection(driverPath, false, reachEnd)
+        return BiliWebDriverConnection(driverPath, false, reachEnd).apply {
+            _driver = this@BiliWebDriverConnection._driver
+        }
     }
 
     /**
@@ -47,6 +49,8 @@ class BiliWebDriverConnection(
         var count = 0
         while (count < 3) {
             scrollByEndKey(driver)
+            scrollByBodyHeight(driver)
+//            scrollByCoordinate(driver, Random.nextInt(1024, 2560))
             sleep(50L, 100L)
             if (reachEnd(driver)) {
                 Log.d(TAG, "${seed.uri} reach end")

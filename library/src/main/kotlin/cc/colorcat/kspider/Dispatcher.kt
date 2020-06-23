@@ -59,9 +59,9 @@ internal class Dispatcher(private val spider: KSpider) {
                 success.add(it.seed)
             }
         }
-        spider.seedJar.save(success, failed, reachedMaxDepth)
         spider.defaultConnection.onAllFinish()
         spider.connections.forEach { (_, conn) -> conn.onAllFinish() }
+        spider.seedJar.save(success, failed, reachedMaxDepth)
     }
 
     @Synchronized

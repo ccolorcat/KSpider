@@ -57,7 +57,7 @@ private val spider = KSpider.Builder()
     .depthFirst(true)
     .build()
 
-private val reachData = LocalDate.of(2020, 6, 5) // 爬 B 站动态时，截止的动态时间
+private val reachData = LocalDate.of(2020, 6, 15) // 爬 B 站动态时，截止的动态时间
 
 private fun reachEndBili(driver: WebDriver): Boolean {
     return driver.findElements(By.cssSelector("a[class='detail-link tc-slate']"))
@@ -87,9 +87,7 @@ private val csj = "https://space.bilibili.com/21686859/dynamic" to "纯水酱" /
 private val idshwm = "https://space.bilibili.com/39457507/dynamic" to "ID是坏文明"
 
 fun main() {
-    for(up in listOf(sqss, qgqsdle, lzx, ezyppj, yyyy, csj, idshwm)) {
-        bySelect(up)
-    }
+    bySelect(csj)
 }
 
 private fun bySelect(selected: Pair<String, String>) {

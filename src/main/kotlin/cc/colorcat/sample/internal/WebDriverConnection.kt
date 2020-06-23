@@ -26,14 +26,20 @@ open class WebDriverConnection(protected val driverPath: String, needSetProperty
         }
     }
 
-    private val driver: WebDriver by lazy {
-//            //创建chrome参数对象
-//            val options = ChromeOptions()
-//            //浏览器后台运行
+    protected var _driver: WebDriver? = null
+
+    private val driver: WebDriver
+        get() {
+            if (_driver == null) {
+                //创建chrome参数对象
+//                val options = ChromeOptions()
+                //浏览器后台运行
 //            options.addArguments("headless")
-//            _driver = ChromeDriver(options)
-        ChromeDriver()
-    }
+//                _driver = ChromeDriver(options)
+                _driver = ChromeDriver()
+            }
+            return _driver!!
+        }
     private var snapshot: WebSnapshot? = null
 
     override fun get(seed: Seed): WebSnapshot? {
@@ -56,18 +62,20 @@ open class WebDriverConnection(protected val driverPath: String, needSetProperty
     }
 
     override fun clone(): Connection {
-        return WebDriverConnection(driverPath, false)
+        return WebDriverConnection(driverPath, false).apply {
+            _driver = this@WebDriverConnection._driver
+        }
     }
 
     override fun onSeedFinish(seed: Seed) {
         snapshot = null
-        driver.run {
+        _driver?.apply {
             close()
         }
     }
 
     override fun onAllFinish() {
-        driver.run {
+        _driver?.apply {
             quit()
         }
     }
