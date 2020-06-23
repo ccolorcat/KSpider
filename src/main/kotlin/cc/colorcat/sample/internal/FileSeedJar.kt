@@ -10,7 +10,7 @@ import java.io.IOException
  * Date: 2020-05-28
  * GitHub: https://github.com/ccolorcat
  */
-class FileSeedJar(private val saveDir: File) : SeedJar {
+open class FileSeedJar(private val saveDir: File) : SeedJar {
     init {
         saveDir.parentFile.mkdirs()
     }
