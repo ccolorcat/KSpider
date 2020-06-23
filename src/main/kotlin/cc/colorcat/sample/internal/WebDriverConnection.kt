@@ -28,7 +28,7 @@ open class WebDriverConnection(protected val driverPath: String, needSetProperty
 
     protected var _driver: WebDriver? = null
 
-    private val driver: WebDriver
+    protected val driver: WebDriver
         get() {
             if (_driver == null) {
                 //创建chrome参数对象
@@ -40,7 +40,7 @@ open class WebDriverConnection(protected val driverPath: String, needSetProperty
             }
             return _driver!!
         }
-    private var snapshot: WebSnapshot? = null
+    protected var snapshot: WebSnapshot? = null
 
     override fun get(seed: Seed): WebSnapshot? {
         if (snapshot?.uri == seed.uri) {

@@ -78,22 +78,26 @@ private fun parseDate(text: String): LocalDate {
     }
 }
 
-private val sqss = "https://space.bilibili.com/424263116/dynamic" to "十千三岁" // sexy
-private val qgqsdle = "https://space.bilibili.com/305276429/dynamic" to "且攻且受的念儿"
-private val lzx = "https://space.bilibili.com/499720112/dynamic" to "绫斩仙"
-private val ezyppj = "https://space.bilibili.com/24715356/dynamic" to "二次元の泡泡酱"
-private val yyyy = "https://space.bilibili.com/4739847/dynamic" to "ラプラス"
-private val csj = "https://space.bilibili.com/21686859/dynamic" to "纯水酱" // the size of image too big
-private val idshwm = "https://space.bilibili.com/39457507/dynamic" to "ID是坏文明"
+private val sqss = Pair("十千三岁", "https://space.bilibili.com/424263116/")  // sexy
+private val qgqsdle = Pair("且攻且受的念儿", "https://space.bilibili.com/305276429/")
+private val lzx = Pair("绫斩仙", "https://space.bilibili.com/499720112/")
+private val ezyppj = Pair("二次元の泡泡酱", "https://space.bilibili.com/24715356/")
+private val yyyy = Pair("ラプラス", "https://space.bilibili.com/4739847/")
+private val csj = Pair("纯水酱", "https://space.bilibili.com/21686859/") // the size of image too big
+private val idshwm = Pair("ID是坏文明", "https://space.bilibili.com/39457507/")
+private val dthk = Pair("动态好康の搬运美图牙", "https://space.bilibili.com/306069337/")
+
+private const val DYNAMIC = "dynamic"
+private const val ALBUM = "album"
 
 fun main() {
-    bySelect(csj)
+    bySelect(sqss)
 }
 
-private fun bySelect(selected: Pair<String, String>) {
-    val url = selected.first
+private fun bySelect(selected: Pair<String, String>, path: String = ALBUM) {
+    val url = selected.second
     val seeds = if (url.startsWith("http")) {
-        listOf(Seed.newSeed("image", url, 0, mapOf("site_name" to "BiliBili", "dir" to selected.second)))
+        listOf(Seed.newSeed("image", "$url$path", 0, mapOf("site_name" to "BiliBili", "dir" to selected.first)))
     } else {
         emptyList()
     }

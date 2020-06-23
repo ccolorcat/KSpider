@@ -57,37 +57,39 @@ class BiliDynamicDetailParser : Parser {
 }
 
 
+/**
+ * https://space.bilibili.com/306069337/dynamic
+ */
+private val DYNAMIC_PAGE = "^(http)(s)?://space.bilibili.com/\\d+/(dynamic)$".toRegex()
+
 class BiliDynamicParser2 : Parser {
     override fun parse(seed: Seed, snapshot: WebSnapshot): List<Scrap> {
-        if (BILI_SPACE_HOST != seed.uri.host.toLowerCase()) return emptyList()
+//        if (BILI_SPACE_HOST != seed.uri.host.toLowerCase()) return emptyList()
+        if (!seed.uri.toString().toLowerCase().matches(DYNAMIC_PAGE)) return emptyList();
 
         return Jsoup.parse(snapshot.contentToString(), seed.baseUrl())
             .select("div.img-content[style~=(.)*(//|http|https)(.)+@(.)*]")
             .map { parseScrap(seed, it.attr("style")) }
-
-//        val scraps = linkedListOf<Scrap>()
-//        val doc = Jsoup.parse(snapshot.contentToString(), seed.baseUrl())
-//        doc.select("div.img-content")
-//            .forEach {
-//                val style = it.attr("style")
-//                var start = style.indexOf("http")
-//                if (start == -1) start = style.indexOf("//")
-//                val end = style.indexOf('@')
-//                if (start != -1 && end != -1) {
-//                    var url = style.substring(start, end)
-//                    url = if (url.startsWith("http")) url else seed.newUriWithJoin(url)
-//                    val scrap = seed.newScrapWithFill("url", url, DepthPattern.RAISE)
-////                    Log.v(TAG, "image scrap: $scrap")
-//                    scraps.add(scrap)
-//                }
-//            }
-//        return scraps
     }
+}
 
-    private fun parseScrap(seed: Seed, style: String): Scrap {
-        val start = style.indexOf("http").let { if (it == -1) style.indexOf("//") else it }
-        val end = style.indexOf('@')
-        val url = style.substring(start, end).let { if (it.startsWith("http")) it else seed.newUriWithJoin(it) }
-        return seed.newScrapWithFill("url", url, DepthPattern.RAISE)
+private fun parseScrap(seed: Seed, style: String, pattern: DepthPattern = DepthPattern.RAISE): Scrap {
+    val start = style.indexOf("http").let { if (it == -1) style.indexOf("//") else it }
+    val end = style.indexOf('@')
+    val url = style.substring(start, end).let { if (it.startsWith("http")) it else seed.newUriWithJoin(it) }
+    return seed.newScrapWithFill("url", url, pattern)
+}
+
+/**
+ * https://space.bilibili.com/306069337/album
+ */
+private val ALBUM_PAGE = "^(http)(s)?://space.bilibili.com/\\d+/(album)$".toRegex()
+
+class BiliAlbumParser : Parser {
+    override fun parse(seed: Seed, snapshot: WebSnapshot): List<Scrap> {
+        if (!seed.uri.toString().toLowerCase().matches(ALBUM_PAGE)) return emptyList()
+        return Jsoup.parse(snapshot.contentToString(), seed.baseUrl())
+            .select("a.picture[style~=(.)*(//|http|https)(.)+@(.)*]")
+            .map { parseScrap(seed, it.attr("style"), DepthPattern.PARALLEL) }
     }
 }

@@ -14,7 +14,7 @@ import kotlin.random.Random
  * Date: 2020-06-16
  * GitHub: https://github.com/ccolorcat
  */
-class BiliWebDriverConnection(
+open class BiliWebDriverConnection(
     driverPath: String,
     needSetProperty: Boolean = true,
     private val reachEnd: ((WebDriver) -> Boolean) = { _ -> false }
