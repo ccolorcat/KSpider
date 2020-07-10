@@ -18,14 +18,16 @@ import java.util.*
 private const val TAG = "Event"
 private const val DRIVER_PATH = "/Users/cxx/Workspace/library/chromedriver"
 
-//private val saveDir = Paths.get(System.getProperty("user.home"), "spider").toString()
-private val saveDir = "/Volumes/Untitled/spider"
+private val saveDir = Paths.get(System.getProperty("user.home"), "spider").toString()
+
+//private val saveDir = "/Volumes/Untitled/spider"
 private val spider = KSpider.Builder()
-    .defaultConnection(WebDriverConnection(DRIVER_PATH))
-    .registerConnection(
-        arrayOf(BILI_SPACE_HOST, BILI_SPACE_DETAIL_HOST),
-        BiliWebDriverConnection(DRIVER_PATH, true, ::reachEndBili)
-    )
+    .defaultConnection(WebDriverConnection(DRIVER_PATH, false))
+//    .registerConnection(
+//        arrayOf(BILI_SPACE_HOST, BILI_SPACE_DETAIL_HOST),
+//        BiliWebDriverConnection(DRIVER_PATH, false, ::reachEndBili)
+//    )
+    .registerConnection(BILI_SPACE_HOST, BiliAlbumWebDriverConnection(DRIVER_PATH, false))
     .seedJar(FileSeedJar(File(saveDir, "seed.txt")))
     .webJar(DiskWebJar(Paths.get(saveDir, "cache").toFile()))
     .registerParser("bing", BingParser())
@@ -33,9 +35,10 @@ private val spider = KSpider.Builder()
     .registerParser("image", Win4000Parser())
     .registerParser("image", HDWallpaperParser())
     .registerParser("image", TpzjParser())
-    .registerParser("image", BiliDynamicParser2())
 //    .registerParser("image", BiliDynamicParser())
 //    .registerParser("image", BiliDynamicDetailParser())
+//    .registerParser("image", BiliDynamicParser2())
+    .registerParser("image", BiliAlbumParser())
     .registerHandler("image", ImageHandler(saveDir))
     .eventListener(object : EventListener {
         override fun onSuccess(seed: Seed) {
@@ -57,7 +60,7 @@ private val spider = KSpider.Builder()
     .depthFirst(true)
     .build()
 
-private val reachData = LocalDate.of(2020, 6, 15) // 爬 B 站动态时，截止的动态时间
+private val reachData = LocalDate.of(2019, 1, 1) // 爬 B 站动态时，截止的动态时间
 
 private fun reachEndBili(driver: WebDriver): Boolean {
     return driver.findElements(By.cssSelector("a[class='detail-link tc-slate']"))
@@ -81,17 +84,38 @@ private fun parseDate(text: String): LocalDate {
 private val sqss = Pair("十千三岁", "https://space.bilibili.com/424263116/")  // sexy
 private val qgqsdle = Pair("且攻且受的念儿", "https://space.bilibili.com/305276429/")
 private val lzx = Pair("绫斩仙", "https://space.bilibili.com/499720112/")
-private val ezyppj = Pair("二次元の泡泡酱", "https://space.bilibili.com/24715356/")
+private val ecyppj = Pair("二次元の泡泡酱", "https://space.bilibili.com/24715356/")
 private val yyyy = Pair("ラプラス", "https://space.bilibili.com/4739847/")
 private val csj = Pair("纯水酱", "https://space.bilibili.com/21686859/") // the size of image too big
 private val idshwm = Pair("ID是坏文明", "https://space.bilibili.com/39457507/")
 private val dthk = Pair("动态好康の搬运美图牙", "https://space.bilibili.com/306069337/")
+private val wfzry = Pair("晚风知人意シ", "https://space.bilibili.com/386462683/")
+private val gzwz = Pair("篝之雾枝Official", "https://space.bilibili.com/52600877/")
+private val qldftj = Pair("勤劳の发图姬", "https://space.bilibili.com/431059983/")
+private val fsmrhx = Pair("浮生梦若回响", "https://space.bilibili.com/544270456/")
+private val fcrqz = Pair("枫赤然秋至", "https://space.bilibili.com/475348820/")
+private val xmyzj = Pair("西木野真姬-Official", "https://space.bilibili.com/100690295/")
+private val btzjdmtj = Pair("不太正经の喵太酱", "https://space.bilibili.com/113429394/")
+private val uchihaItai = Pair("UchihaItai", "https://space.bilibili.com/399094478/")
+private val srx = Pair("散人兄", "https://space.bilibili.com/35599050/")
+private val xcyz = Pair("星尘YZ", "https://space.bilibili.com/489348703/")
+private val wsllndhzx = Pair("污神丶零落泪滴化作雪", "https://space.bilibili.com/19504033/")
+private val wygzj = Pair("五月古筝酱", "https://space.bilibili.com/317477087/")
+private val lgmlldd = Pair("老干妈榴莲蛋挞", "https://space.bilibili.com/102740397/")
+private val wdmzyc = Pair("我的名字亦宸", "https://space.bilibili.com/200347229/")
+private val halmadswj = Pair("画埃罗芒阿的纱雾酱", "https://space.bilibili.com/424427706/")
+private val wnsdhqp = Pair("无奈输的好奇葩", "https://space.bilibili.com/366151712/")
+private val agytdm = Pair("阿狗与他的猫", "https://space.bilibili.com/12313178/") // todo
+private val qmdzzmt = Pair("勤勉の転載美图", "https://space.bilibili.com/623607452/")
+private val yyy = Pair("依缘y", "https://space.bilibili.com/16021397/")
+private val lldmtby = Pair("林落的美图搬运", "https://space.bilibili.com/546240754/")
+private val blg = Pair("板栗宫丶", "https://space.bilibili.com/375247/")
 
 private const val DYNAMIC = "dynamic"
 private const val ALBUM = "album"
 
 fun main() {
-    bySelect(sqss)
+    bySelect(wdmzyc, ALBUM)
 }
 
 private fun bySelect(selected: Pair<String, String>, path: String = ALBUM) {

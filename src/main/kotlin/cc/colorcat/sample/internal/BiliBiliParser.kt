@@ -65,11 +65,17 @@ private val DYNAMIC_PAGE = "^(http)(s)?://space.bilibili.com/\\d+/(dynamic)$".to
 class BiliDynamicParser2 : Parser {
     override fun parse(seed: Seed, snapshot: WebSnapshot): List<Scrap> {
 //        if (BILI_SPACE_HOST != seed.uri.host.toLowerCase()) return emptyList()
-        if (!seed.uri.toString().toLowerCase().matches(DYNAMIC_PAGE)) return emptyList();
+        if (!seed.uri.toString().toLowerCase().matches(DYNAMIC_PAGE)) return emptyList()
 
-        return Jsoup.parse(snapshot.contentToString(), seed.baseUrl())
-            .select("div.img-content[style~=(.)*(//|http|https)(.)+@(.)*]")
-            .map { parseScrap(seed, it.attr("style")) }
+        val result = linkedListOf<Scrap>()
+        val doc = Jsoup.parse(snapshot.contentToString(), seed.baseUrl())
+
+        doc.select("div.img-content[style~=(.)*(//|http|https)(.)+@(.)*]")
+            .mapTo(result) { parseScrap(seed, it.attr("style")) }
+        doc.select("img.card-3[src~=^(http|https|//)(.)*]")
+            .mapTo(result) { parseScrap(seed, it.attr("src")) }
+
+        return result
     }
 }
 

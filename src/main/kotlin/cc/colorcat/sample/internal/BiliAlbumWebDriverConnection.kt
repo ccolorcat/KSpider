@@ -17,7 +17,7 @@ class BiliAlbumWebDriverConnection(
         driver.get(seed.uri.toString())
         val builder = StringBuilder(driver.pageSource)
         val nextPage = driver.findElement(By.cssSelector("li.panigation:last-child"))
-        while (nextPage.isDisplayed) {
+        while (nextPage != null && nextPage.isDisplayed) {
             nextPage.click()
             sleep(500L, 800L)
             builder.append(driver.pageSource)
