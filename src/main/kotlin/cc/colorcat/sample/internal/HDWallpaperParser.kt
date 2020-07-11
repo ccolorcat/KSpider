@@ -10,11 +10,10 @@ import org.jsoup.Jsoup
  */
 class HDWallpaperParser : Parser {
     private companion object {
-        private const val HOST = "www.hdwallpapers.in"
+        private  val FILTER = "^(http)(s)?://www.hdwallpapers.in/(.)*".toRegex()
     }
 
     override fun parse(seed: Seed, snapshot: WebSnapshot): List<Scrap> {
-        if (HOST != seed.uri.host) return emptyList()
         val scraps = linkedListOf<Scrap>()
         val doc = Jsoup.parse(snapshot.contentToString(), seed.baseUrl())
 
@@ -34,5 +33,9 @@ class HDWallpaperParser : Parser {
             .mapTo(scraps) { seed.newScrapWithFill("url", seed.newUriWithJoin(it)) }
 
         return scraps
+    }
+
+    override fun canParse(url: String): Boolean {
+        return url.matches(FILTER)
     }
 }

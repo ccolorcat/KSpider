@@ -7,4 +7,6 @@ package cc.colorcat.kspider
  */
 interface Parser {
     fun parse(seed: Seed, snapshot: WebSnapshot): List<Scrap>
+
+    fun canParse(url: String): Boolean = true
 }

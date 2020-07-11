@@ -27,9 +27,10 @@ private val spider = KSpider.Builder()
 //        arrayOf(BILI_SPACE_HOST, BILI_SPACE_DETAIL_HOST),
 //        BiliWebDriverConnection(DRIVER_PATH, false, ::reachEndBili)
 //    )
-    .registerConnection(BILI_SPACE_HOST, BiliAlbumWebDriverConnection(DRIVER_PATH, false))
+    .registerConnection(BiliAlbumWebDriverConnection(DRIVER_PATH, true))
+    .registerConnection(BiliWebDriverConnection(DRIVER_PATH, true))
     .seedJar(FileSeedJar(File(saveDir, "seed.txt")))
-    .webJar(DiskWebJar(Paths.get(saveDir, "cache").toFile()))
+//    .webJar(DiskWebJar(Paths.get(saveDir, "cache").toFile()))
     .registerParser("bing", BingParser())
     .registerHandler("bing", BingHandler(saveDir))
     .registerParser("image", Win4000Parser())
@@ -37,7 +38,7 @@ private val spider = KSpider.Builder()
     .registerParser("image", TpzjParser())
 //    .registerParser("image", BiliDynamicParser())
 //    .registerParser("image", BiliDynamicDetailParser())
-//    .registerParser("image", BiliDynamicParser2())
+    .registerParser("image", BiliDynamicParser2())
     .registerParser("image", BiliAlbumParser())
     .registerHandler("image", ImageHandler(saveDir))
     .eventListener(object : EventListener {
@@ -110,12 +111,13 @@ private val qmdzzmt = Pair("勤勉の転載美图", "https://space.bilibili.com/
 private val yyy = Pair("依缘y", "https://space.bilibili.com/16021397/")
 private val lldmtby = Pair("林落的美图搬运", "https://space.bilibili.com/546240754/")
 private val blg = Pair("板栗宫丶", "https://space.bilibili.com/375247/")
+private val ywqlm = Pair("鸢尾千泠梦", "https://space.bilibili.com/382362314/")
 
 private const val DYNAMIC = "dynamic"
 private const val ALBUM = "album"
 
 fun main() {
-    bySelect(wdmzyc, ALBUM)
+    bySelect(ywqlm, ALBUM)
 }
 
 private fun bySelect(selected: Pair<String, String>, path: String = ALBUM) {

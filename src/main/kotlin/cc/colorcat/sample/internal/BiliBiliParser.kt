@@ -10,17 +10,16 @@ import org.jsoup.Jsoup
  */
 
 private const val TAG = "Bilibili"
-const val BILI_SPACE_HOST = "space.bilibili.com"
-const val BILI_SPACE_DETAIL_HOST = "t.bilibili.com"
-
 
 class BiliDynamicParser : Parser {
+    private companion object {
+        private val dynamic = "^(http)(s)?://space.bilibili.com/\\d+/(dynamic)$".toRegex()
+    }
+
     /**
      * <a data-v-c6f3a60c="" href="//t.bilibili.com/400893746359688855?tab=2" target="_blank" class="detail-link tc-slate">昨天 07:52</a>
      */
     override fun parse(seed: Seed, snapshot: WebSnapshot): List<Scrap> {
-        if (BILI_SPACE_HOST != seed.uri.host.toLowerCase()) return emptyList()
-
         val scraps = linkedListOf<Scrap>()
         val doc = Jsoup.parse(snapshot.contentToString(), seed.baseUrl())
         doc.select("a[class=detail-link tc-slate][href~=^(//t.bilibili.com)(.)*][target=_blank]")
@@ -32,6 +31,10 @@ class BiliDynamicParser : Parser {
             }
         return scraps
     }
+
+    override fun canParse(url: String): Boolean {
+        return url.matches(dynamic);
+    }
 }
 
 /**
@@ -40,19 +43,18 @@ class BiliDynamicParser : Parser {
  * <div data-v-2ef3df58="" class="img-content" style="background-image: url(&quot;//i0.hdslb.com/bfs/album/d99a48e1b6383e1bdc0488608c7639e5b71de394.png@480w_640h_1e_1c.webp&quot;); width: 240px; height: 320px;"></div>
  */
 class BiliDynamicDetailParser : Parser {
-    override fun parse(seed: Seed, snapshot: WebSnapshot): List<Scrap> {
-        if (BILI_SPACE_DETAIL_HOST != seed.uri.host.toLowerCase()) return emptyList()
+    private companion object {
+        private val dynamicDetail = "^(http)(s)?://t.bilibili.com/(.)*".toRegex()
+    }
 
+    override fun parse(seed: Seed, snapshot: WebSnapshot): List<Scrap> {
         return Jsoup.parse(snapshot.contentToString(), seed.baseUrl())
             .select("div.img-content[style~=(.)*//(.)+@(.)*]")
             .map { parseScrap(seed, it.attr("style")) }
     }
 
-    private fun parseScrap(seed: Seed, style: String): Scrap {
-        val start = style.indexOf("//")
-        val end = style.indexOf('@')
-        val url = style.substring(start, end)
-        return seed.newScrapWithFill("url", seed.newUriWithJoin(url), DepthPattern.RAISE)
+    override fun canParse(url: String): Boolean {
+        return url.matches(dynamicDetail)
     }
 }
 
@@ -60,13 +62,14 @@ class BiliDynamicDetailParser : Parser {
 /**
  * https://space.bilibili.com/306069337/dynamic
  */
-private val DYNAMIC_PAGE = "^(http)(s)?://space.bilibili.com/\\d+/(dynamic)$".toRegex()
+
 
 class BiliDynamicParser2 : Parser {
-    override fun parse(seed: Seed, snapshot: WebSnapshot): List<Scrap> {
-//        if (BILI_SPACE_HOST != seed.uri.host.toLowerCase()) return emptyList()
-        if (!seed.uri.toString().toLowerCase().matches(DYNAMIC_PAGE)) return emptyList()
+    private companion object {
+        private val dynamic = "^(http)(s)?://space.bilibili.com/\\d+/(dynamic)$".toRegex()
+    }
 
+    override fun parse(seed: Seed, snapshot: WebSnapshot): List<Scrap> {
         val result = linkedListOf<Scrap>()
         val doc = Jsoup.parse(snapshot.contentToString(), seed.baseUrl())
 
@@ -76,6 +79,10 @@ class BiliDynamicParser2 : Parser {
             .mapTo(result) { parseScrap(seed, it.attr("src")) }
 
         return result
+    }
+
+    override fun canParse(url: String): Boolean {
+        return url.matches(dynamic)
     }
 }
 
@@ -89,13 +96,18 @@ private fun parseScrap(seed: Seed, style: String, pattern: DepthPattern = DepthP
 /**
  * https://space.bilibili.com/306069337/album
  */
-private val ALBUM_PAGE = "^(http)(s)?://space.bilibili.com/\\d+/(album)$".toRegex()
-
 class BiliAlbumParser : Parser {
+    private companion object {
+        private val album = "^(http)(s)?://space.bilibili.com/\\d+/(album)$".toRegex()
+    }
+
     override fun parse(seed: Seed, snapshot: WebSnapshot): List<Scrap> {
-        if (!seed.uri.toString().toLowerCase().matches(ALBUM_PAGE)) return emptyList()
         return Jsoup.parse(snapshot.contentToString(), seed.baseUrl())
             .select("a.picture[style~=(.)*(//|http|https)(.)+@(.)*]")
             .map { parseScrap(seed, it.attr("style"), DepthPattern.PARALLEL) }
+    }
+
+    override fun canParse(url: String): Boolean {
+        return url.matches(album)
     }
 }

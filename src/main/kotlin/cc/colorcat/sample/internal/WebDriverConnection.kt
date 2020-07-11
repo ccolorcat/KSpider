@@ -16,12 +16,12 @@ import kotlin.random.Random
  * Date: 2020-05-28
  * GitHub: https://github.com/ccolorcat
  */
-open class WebDriverConnection(protected val driverPath: String, needSetProperty: Boolean = true) : Connection {
+open class WebDriverConnection(protected val driverPath: String = "", needSetProperty: Boolean = false) : Connection {
     init {
         // IE浏览器    （webdriver.ie.driver）
         // 火狐浏览器    (webdriver.gecko.driver)
         // 谷歌浏览器    (webdriver.chrome.driver)
-        if (needSetProperty) {
+        if (needSetProperty && driverPath.isNotEmpty()) {
             System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, driverPath)
         }
     }

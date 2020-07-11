@@ -13,7 +13,7 @@ class KSpider private constructor(builder: Builder) : Call.Factory {
     internal val parser: Parser = ParserProxy(parsers)
     val handlers: Map<String, List<Handler>> = builder.handlers
     val interceptors: List<Interceptor> = builder.interceptors
-    internal val connections: Map<String, Connection> = builder.connections
+    internal val connections: List<Connection> = builder.connections
     internal val defaultConnection: Connection = builder.defaultConnection
     val executor: ExecutorService = builder.executor
     val depthFirst: Boolean = builder.depthFirst
@@ -58,8 +58,9 @@ class KSpider private constructor(builder: Builder) : Call.Factory {
         dispatcher.enqueue(calls, depthFirst)
     }
 
-    internal fun newConnection(host: String): Connection {
-        return connections.getOrDefault(host, defaultConnection).clone()
+    internal fun newConnection(seed: Seed): Connection {
+        val conn = connections.find { it.canConnect(seed) } ?: defaultConnection
+        return conn.clone()
     }
 
     override fun newCall(seed: Seed): Call = RealCall(seed, this)
@@ -71,15 +72,15 @@ class KSpider private constructor(builder: Builder) : Call.Factory {
         private val _parsers: MutableMap<String, MutableList<Parser>>
         private val _handlers: MutableMap<String, MutableList<Handler>>
         private val _interceptors: MutableList<Interceptor>
-        private val _connections: MutableMap<String, Connection>
+        private val _connections: MutableList<Connection>
         val parsers: Map<String, List<Parser>>
             get() = _parsers.toImmutableMap()
         val handlers: Map<String, List<Handler>>
             get() = _handlers.toImmutableMap()
         val interceptors: List<Interceptor>
             get() = _interceptors.toImmutableList()
-        val connections: Map<String, Connection>
-            get() = _connections.toMap()
+        val connections: List<Connection>
+            get() = _connections.toImmutableList()
         var defaultConnection: Connection
             private set
         var executor: ExecutorService
@@ -103,7 +104,7 @@ class KSpider private constructor(builder: Builder) : Call.Factory {
             _parsers = mutableMapOf()
             _handlers = mutableMapOf()
             _interceptors = mutableListOf()
-            _connections = mutableMapOf()
+            _connections = mutableListOf()
             defaultConnection = HttpConnection()
             executor = defaultService()
             depthFirst = false
@@ -119,7 +120,7 @@ class KSpider private constructor(builder: Builder) : Call.Factory {
             _parsers = spider.parsers.toMutableMap()
             _handlers = spider.handlers.toMutableMap()
             _interceptors = spider.interceptors.toMutableList()
-            _connections = spider.connections.toMutableMap()
+            _connections = spider.connections.toMutableList()
             defaultConnection = spider.defaultConnection
             executor = spider.executor
             depthFirst = spider.depthFirst
@@ -151,18 +152,18 @@ class KSpider private constructor(builder: Builder) : Call.Factory {
             return this
         }
 
-        fun registerConnection(host: String, connection: Connection): Builder {
-            _connections[host] = connection
+        fun registerConnection(connection: Connection): Builder {
+            _connections.add(connection)
             return this
         }
 
-        fun registerConnection(hosts: Array<String>, connection: Connection): Builder {
-            hosts.forEach { _connections[it] = connection }
-            return this
-        }
+//        fun registerConnection(hosts: Array<String>, connection: Connection): Builder {
+//            hosts.forEach { _connections[it] = connection }
+//            return this
+//        }
 
-        fun unregisterConnection(host: String): Builder {
-            _connections.remove(host)
+        fun unregisterConnection(connection: Connection): Builder {
+            _connections.remove(connection)
             return this
         }
 

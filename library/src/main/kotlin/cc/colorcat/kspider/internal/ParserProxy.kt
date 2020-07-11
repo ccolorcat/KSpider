@@ -15,9 +15,10 @@ internal class ParserProxy(private val parsers: Map<String, List<Parser>>) : Par
 
     override fun parse(seed: Seed, snapshot: WebSnapshot): List<Scrap> {
         val parsers = this.parsers[seed.tag]
-        if (parsers == null || parsers.isEmpty()) return emptyList()
+        if (parsers.isNullOrEmpty()) return emptyList()
         val scraps = LinkedList<Scrap>()
-        parsers.forEach { scraps.addAll(it.parse(seed, snapshot)) }
+        val url = snapshot.uri.toString()
+        parsers.forEach { if (it.canParse(url)) scraps.addAll(it.parse(seed, snapshot)) }
         return scraps
     }
 }

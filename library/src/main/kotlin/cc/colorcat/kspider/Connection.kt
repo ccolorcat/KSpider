@@ -16,4 +16,6 @@ interface Connection : Cloneable {
     fun onSeedFinish(seed: Seed) {}
 
     fun onAllFinish() {}
+
+    fun canConnect(seed: Seed): Boolean = true
 }

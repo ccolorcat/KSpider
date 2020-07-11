@@ -9,7 +9,7 @@ import java.io.IOException
  * Github: https://github.com/ccolorcat
  */
 internal class RealCall(override val seed: Seed, private val spider: KSpider) : Call {
-    internal val connection = spider.newConnection(seed.uri.host)
+    internal val connection = spider.newConnection(seed)
     private var _retryCount = 0
 
     override val retryCount: Int

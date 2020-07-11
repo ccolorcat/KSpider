@@ -22,7 +22,12 @@ open class BiliWebDriverConnection(
 
     private companion object {
         const val TAG = "BiliBili"
+        private val dynamic = "^(http)(s)?://space.bilibili.com/\\d+/(dynamic)$".toRegex()
+        private val dynamicDetail = "^(http)(s)?://t.bilibili.com/(.)*".toRegex()
         private val noMore = By.className("no-more")
+
+        const val BILI_SPACE_HOST = "space.bilibili.com"
+        const val BILI_SPACE_DETAIL_HOST = "t.bilibili.com"
     }
 
     override fun afterLoadUrl(driver: WebDriver, seed: Seed) {
@@ -75,5 +80,10 @@ open class BiliWebDriverConnection(
                 break
             }
         }
+    }
+
+    override fun canConnect(seed: Seed): Boolean {
+        val url = seed.uri.toString()
+        return url.matches(dynamic) || url.matches(dynamicDetail)
     }
 }

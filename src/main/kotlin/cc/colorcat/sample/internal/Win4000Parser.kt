@@ -14,13 +14,11 @@ import org.jsoup.nodes.Element
 class Win4000Parser : Parser {
     // http://www.win4000.com/meinv202118_1.html
     companion object {
-        private const val HOST = "www.win4000.com"
+        private val FILTER = "^(http)(s)?://www.win4000.com/(.)*".toRegex()
         val nextGroupStartPage = "^(http)(s)?://(.)*((\\d{4,}.(htm|html))|(_1.(htm|html)))$".toRegex()
     }
 
     override fun parse(seed: Seed, snapshot: WebSnapshot): List<Scrap> {
-        if (HOST != seed.uri.host.toLowerCase()) return emptyList()
-
         val doc = Jsoup.parse(snapshot.contentToString(), seed.baseUrl())
         val imageAndNext = doc.selectFirst("div.pic-meinv a[href~=^(http)(s)?://(.)*\\.(htm|html)$]")
         val image = imageAndNext.selectFirst("img.pic-large[src~=^(http)(s)?://(.)*\\.(jpg|png|jpeg)$]")
@@ -34,10 +32,14 @@ class Win4000Parser : Parser {
         val pattern = if (nextUrl.matches(nextGroupStartPage)) DepthPattern.RAISE else DepthPattern.PARALLEL
         val nextScrap = seed.newScrapWithJoin(nextUrl, pattern)
             .fill("dir", title)
-            .fillIfAbsent("Host", HOST)
+            .fillIfAbsent("Host", seed.uri.host)
             .fill("Referer", seed.uri.toString())
 
         return listOf(imageScrap, nextScrap)
+    }
+
+    override fun canParse(url: String): Boolean {
+        return url.matches(FILTER)
     }
 
     private fun parseTitle(imageAndNext: Element, doc: Document): String {
